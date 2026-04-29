@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% block title %}Course Catalog – OptiSeat{% endblock %}
+
+{% block extra_css %}
+<style>
+.seat-low { color:var(--red)!important; animation:pulse 2s infinite; }
+.seat-ok  { color:var(--green)!important; }
+.cat-chip { display:inline-flex;align-items:center;gap:.4rem;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:100px;padding:.3rem .9rem;font-size:.8rem;font-weight:600;color:var(--muted2);cursor:pointer;transition:all .2s; }
+.cat-chip:hover,.cat-chip.active { background:rgba(99,102,241,.15);border-color:rgba(99,102,241,.4);color:#818CF8; }
+.search-box { background:var(--card2)!important;border:1px solid var(--border)!important;color:var(--text)!important;border-radius:12px;padding:.65rem 1rem .65rem 2.8rem!important; }
+.search-box:focus { border-color:var(--accent)!important;box-shadow:0 0 0 3px rgba(99,102,241,.15)!important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- Header -->
+  <div class="text-center mb-5 fade-up">
+    <div style="color:var(--muted2);font-size:.85rem;font-weight:600;margin-bottom:.6rem;"><i class="bi bi-grid me-1"></i> COURSE CATALOG</div>
+    <h1 class="section-title" style="font-size:2.4rem;">Explore Your <span class="text-grad">Future Career</span></h1>
+    <p style="color:var(--muted2);max-width:520px;margin:0 auto;margin-top:.7rem;line-height:1.7;">
+      Browse electives across departments. Seats update live every 3 seconds.
+    </p>
+  </div>
+
+  <!-- Filters -->
+  <div class="glass-card p-4 mb-5 fade-up delay-1">
+    <form method="get" id="filterForm">
+      <div class="row g-3 align-items-end">
+        <!-- Search -->
+        <div class="col-lg-4">
+          <label class="form-label">Search</label>
+          <div class="position-relative">
+            <i class="bi bi-search position-absolute" style="left:1rem;top:50%;transform:translateY(-50%);color:var(--muted);"></i>
+            <input type="text" name="q" value="{{ q_filter }}" class="form-control search-box" placeholder="Course name, code, keywords…">
+          </div>
+        </div>
+        <!-- Department -->
+        <div class="col-lg-3">
+          <label class="form-label">Department</label>
+          <select name="department" class="form-select">
+            <option value="">All Departments</option>
+            {% for dept in departments %}
+            <option value="{{ dept.code }}" {% if dept_filter == dept.code %}selected{% endif %}>{{ dept.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <!-- Category -->
+        <div class="col-lg-3">
+          <label class="form-label">Category</label>
+          <select name="category" class="form-select">
+            <option value="">All Categories</option>
+            <option value="PROFESSIONAL" {% if category_filter == 'PROFESSIONAL' %}selected{% endif %}>Professional Elective</option>
+            <option value="OPEN"         {% if category_filter == 'OPEN'         %}selected{% endif %}>Open Elective</option>
+            <option value="ABILITY"      {% if category_filter == 'ABILITY'      %}selected{% endif %}>Ability Enhancement</option>
+          </select>
+        </div>
+        <!-- Buttons -->
+        <div class="col-lg-2">
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-accent flex-grow-1">Filter</button>
+            <a href="{% url 'catalog' %}" class="btn btn-ghost">✕</a>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Course Grid -->
+  <div class="row g-4" id="courseGrid">
+    {% for course in courses %}
+    <div class="col-md-6 col-xl-4 fade-up" style="animation-delay:{{ forloop.counter0 }}00ms;">
+      <div class="glass-card p-4 h-100 d-flex flex-column">
+
+        <!-- Top row: category + seats -->
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          {% if course.category == 'PROFESSIONAL' %}
+            <span class="badge-pro">Professional</span>
+          {% elif course.category == 'OPEN' %}
+            <span class="badge-open">Open Elective</span>
+          {% else %}
+            <span class="badge-ability">Ability Enhn.</span>
+          {% endif %}
+          <div class="text-end">
+            <div style="color:var(--muted);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">Seats Left</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:800;line-height:1;">
+              <span class="seat-counter {% if course.available_seats < 3 %}seat-low{% else %}seat-ok{% endif %}"
+                    data-course-id="{{ course.id }}">{{ course.available_seats }}</span>
+              <span style="font-size:.9rem;color:var(--muted);font-weight:500;">/ {{ course.capacity }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Course title -->
+        <h3 style="font-weight:700;font-size:1.05rem;margin-bottom:.3rem;">{{ course.name }}</h3>
+        <div style="color:var(--accent);font-size:.8rem;font-weight:600;margin-bottom:1.2rem;">
+          {{ course.department.name }} · <span style="color:var(--muted2);">{{ course.code }}</span>
+        </div>
+
+        <!-- Seat progress bar -->
+        <div class="progress mb-4" style="height:5px;">
+          <div class="progress-bar-accent" style="width:{{ course.fill_percentage }}%;{% if course.available_seats == 0 %}background:var(--red)!important;{% endif %}"></div>
+        </div>
+
+        <!-- Details -->
+        <div class="flex-grow-1">
+          <div class="mb-2">
+            <div style="color:#60A5FA;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-bottom:.3rem;">💼 Job Perspective</div>
+            <p style="color:var(--muted2);font-size:.85rem;line-height:1.5;margin:0;">{{ course.job_perspective|truncatewords:18 }}</p>
+          </div>
+          {% if course.salient_features %}
+          <div class="mt-2 mb-2">
+            <div style="color:#60A5FA;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-bottom:.3rem;">⚡ Highlights</div>
+            <p style="color:var(--muted2);font-size:.85rem;line-height:1.5;margin:0;">{{ course.salient_features|truncatewords:12 }}</p>
+          </div>
+          {% endif %}
+          {% if course.prerequisites and course.prerequisites != 'None' %}
+          <div class="mt-2">
+            <span style="color:var(--muted);font-size:.78rem;"><i class="bi bi-check2 text-accent me-1"></i>Pre: {{ course.prerequisites }}</span>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- CTA -->
+        <div class="mt-4">
+          {% if user.is_authenticated and is_student %}
+            <a href="{% url 'submit_preference' %}" class="btn btn-accent w-100 {% if course.available_seats == 0 %}opacity-50{% endif %}"
+               {% if course.available_seats == 0 %}style="pointer-events:none;"{% endif %}>
+              {% if course.available_seats > 0 %}
+                <i class="bi bi-plus-lg me-1"></i> Add to Preferences
+              {% else %}
+                <i class="bi bi-x-circle me-1"></i> Fully Booked
+              {% endif %}
+            </a>
+          {% elif user.is_staff %}
+            <div class="text-center py-2" style="color:var(--muted);font-size:.82rem;"><i class="bi bi-eye me-1"></i>Admin View</div>
+          {% else %}
+            <a href="{% url 'login' %}" class="btn btn-outline-accent w-100">
+              <i class="bi bi-box-arrow-in-right me-1"></i> Login to Opt-In
+            </a>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5" style="color:var(--muted);">
+      <div style="font-size:3rem;margin-bottom:1rem;">🔍</div>
+      <h5 style="font-weight:600;margin-bottom:.5rem;">No courses match your filters</h5>
+      <a href="{% url 'catalog' %}" class="btn btn-ghost mt-2">Clear Filters</a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Live seat polling every 3 seconds
+var _prevSeats = {};
+function pollSeats() {
+  fetch('/api/seats/')
+    .then(r => r.json())
+    .then(data => {
+      document.querySelectorAll('.seat-counter').forEach(el => {
+        const id = el.dataset.courseId;
+        if (data[id]) {
+          const avail = data[id].available;
+          // Toast if seats just changed
+          if (_prevSeats[id] !== undefined && _prevSeats[id] !== avail) {
+            if (typeof showToast === 'function') {
+              showToast('Seat count updated for a course', avail < _prevSeats[id] ? 'error' : 'success');
+            }
+          }
+          _prevSeats[id] = avail;
+          el.textContent = avail;
+          el.className = 'seat-counter ' + (avail < 3 ? 'seat-low' : 'seat-ok');
+          // Update progress bar
+          const total = data[id].total;
+          const filled = data[id].filled;
+          const card = el.closest('.glass-card');
+          if (card) {
+            const bar = card.querySelector('.progress-bar-accent');
+            if (bar) bar.style.width = (total > 0 ? (filled/total*100) : 0) + '%';
+          }
+        }
+      });
+    })
+    .catch(() => {});
+}
+setInterval(pollSeats, 3000);
+</script>
+{% endblock %}

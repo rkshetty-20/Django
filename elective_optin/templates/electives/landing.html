@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block title %}OptiSeat – Fair Elective Allocation{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero { padding: 5rem 0 4rem; position: relative; overflow: hidden; }
+.hero-blob {
+  position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none;
+}
+.blob1 { width:500px;height:500px;background:rgba(99,102,241,.12);top:-100px;right:-150px; }
+.blob2 { width:400px;height:400px;background:rgba(16,185,129,.08);bottom:-100px;left:-100px; }
+.hero-badge {
+  display:inline-flex; align-items:center; gap:.5rem;
+  background:rgba(99,102,241,.1); border:1px solid rgba(99,102,241,.25);
+  color:#818CF8; border-radius:100px; padding:.35rem 1rem; font-size:.82rem; font-weight:600;
+}
+.hero-title { font-family:'Space Grotesk',sans-serif; font-size:clamp(2.5rem,5vw,4rem); font-weight:800; line-height:1.1; letter-spacing:-1.5px; }
+.hero-sub   { color:var(--muted2); font-size:1.1rem; max-width:560px; line-height:1.7; }
+.feature-icon { width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1rem; }
+.stat-num { font-family:'Space Grotesk',sans-serif; font-size:2.4rem; font-weight:800; line-height:1; }
+.how-step { display:flex; gap:1.5rem; align-items:flex-start; }
+.step-num { width:40px;height:40px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.95rem;flex-shrink:0; }
+.step-line { width:2px;height:40px;background:var(--border);margin:0 auto; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-blob blob1"></div>
+  <div class="hero-blob blob2"></div>
+  <div class="container">
+    <div class="row align-items-center gy-5">
+      <div class="col-lg-6 fade-up">
+        <div class="hero-badge mb-4">
+          <i class="bi bi-stars"></i> AI-Powered · Fair · Transparent
+        </div>
+        <h1 class="hero-title mb-4">
+          Fair Elective Allocation<br>
+          <span class="text-grad">Powered by AI</span>
+        </h1>
+        <p class="hero-sub mb-5">
+          OptiSeat uses a transparent, score-based ranked-choice algorithm to allocate electives fairly.
+          No chaos. No favouritism. Just data-driven fairness.
+        </p>
+        <div class="d-flex flex-wrap gap-3">
+          <a href="{% url 'login' %}" class="btn btn-accent btn-lg px-4">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Student Login
+          </a>
+          <a href="{% url 'catalog' %}" class="btn btn-ghost btn-lg px-4">
+            <i class="bi bi-grid me-2"></i>Browse Courses
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-6 fade-up delay-2">
+        <!-- Hero stats card -->
+        <div class="glass-card p-4" style="border:1px solid rgba(99,102,241,.2);">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <span style="font-weight:700;font-size:1rem;">Live Platform Stats</span>
+            <span class="pulse-anim" style="width:10px;height:10px;background:var(--green);border-radius:50%;display:inline-block;"></span>
+          </div>
+          <div class="row g-3">
+            <div class="col-4 text-center">
+              <div class="stat-num text-grad">{{ total_courses }}</div>
+              <div style="color:var(--muted);font-size:.8rem;margin-top:.3rem;">Courses</div>
+            </div>
+            <div class="col-4 text-center">
+              <div class="stat-num" style="background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">{{ total_seats }}</div>
+              <div style="color:var(--muted);font-size:.8rem;margin-top:.3rem;">Total Seats</div>
+            </div>
+            <div class="col-4 text-center">
+              <div class="stat-num" style="color:#F59E0B;">{{ total_depts }}</div>
+              <div style="color:var(--muted);font-size:.8rem;margin-top:.3rem;">Departments</div>
+            </div>
+          </div>
+          <div class="divider my-4"></div>
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="step-num" style="width:36px;height:36px;font-size:.85rem;">1</div>
+            <div>
+              <div style="font-weight:600;font-size:.9rem;">Submit Your Top 3 Choices</div>
+              <div style="color:var(--muted);font-size:.8rem;">Rank courses by preference priority</div>
+            </div>
+          </div>
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="step-num" style="width:36px;height:36px;font-size:.85rem;">2</div>
+            <div>
+              <div style="font-weight:600;font-size:.9rem;">Algorithm Computes Your Score</div>
+              <div style="color:var(--muted);font-size:.8rem;">CGPA (50%) + Priority (30%) + Time (20%)</div>
+            </div>
+          </div>
+          <div class="d-flex align-items-center gap-3">
+            <div class="step-num" style="width:36px;height:36px;font-size:.85rem;">3</div>
+            <div>
+              <div style="font-weight:600;font-size:.9rem;">Fair Seat Allocation</div>
+              <div style="color:var(--muted);font-size:.8rem;">Highest scores get first choice seats</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section style="padding:4rem 0;">
+  <div class="container">
+    <div class="text-center mb-5 fade-up">
+      <h2 class="section-title mb-2">Why OptiSeat?</h2>
+      <p style="color:var(--muted2);">Built to solve the chaos of manual elective allocation</p>
+    </div>
+    <div class="row g-4">
+      {% for f in features %}{% endfor %}
+      <div class="col-md-6 col-lg-3 fade-up delay-1">
+        <div class="glass-card p-4 h-100">
+          <div class="feature-icon" style="background:rgba(99,102,241,.15);">🧠</div>
+          <h5 style="font-weight:700;margin-bottom:.5rem;">AI Recommendations</h5>
+          <p style="color:var(--muted2);font-size:.9rem;line-height:1.6;">Smart course suggestions based on your branch, CGPA, and interests using content-based filtering.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3 fade-up delay-2">
+        <div class="glass-card p-4 h-100">
+          <div class="feature-icon" style="background:rgba(16,185,129,.15);">⚡</div>
+          <h5 style="font-weight:700;margin-bottom:.5rem;">Live Seat Counter</h5>
+          <p style="color:var(--muted2);font-size:.9rem;line-height:1.6;">Real-time seat availability updated every 3 seconds via AJAX polling. No page refresh needed.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3 fade-up delay-3">
+        <div class="glass-card p-4 h-100">
+          <div class="feature-icon" style="background:rgba(245,158,11,.15);">🔒</div>
+          <h5 style="font-weight:700;margin-bottom:.5rem;">Race-Condition Safe</h5>
+          <p style="color:var(--muted2);font-size:.9rem;line-height:1.6;">Uses Django's <code style="color:var(--accent)">select_for_update()</code> + atomic transactions to prevent overbooking.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3 fade-up delay-4">
+        <div class="glass-card p-4 h-100">
+          <div class="feature-icon" style="background:rgba(59,130,246,.15);">📊</div>
+          <h5 style="font-weight:700;margin-bottom:.5rem;">Rich Analytics</h5>
+          <p style="color:var(--muted2);font-size:.9rem;line-height:1.6;">Admin dashboard with Chart.js visualizations: demand, CGPA distribution, department trends.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section style="padding:3rem 0 5rem;">
+  <div class="container">
+    <div class="glass-card p-5 text-center fade-up" style="background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(139,92,246,.05));border:1px solid rgba(99,102,241,.2);">
+      <h2 class="section-title mb-3">Ready to get your elective?</h2>
+      <p style="color:var(--muted2);margin-bottom:2rem;">Login now, submit your top 3 preferences, and let the algorithm do the rest.</p>
+      <a href="{% url 'login' %}" class="btn btn-accent btn-lg px-5">Get Started <i class="bi bi-arrow-right ms-2"></i></a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h3>Allocation Results</h3>
+
+<table class="table">
+    <tr>
+        <th>Student</th>
+        <th>Course</th>
+    </tr>
+
+    {% for p in prefs %}
+    <tr>
+        <td>{{ p.student.name }}</td>
+        <td>{{ p.course.name }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<a href="/" class="btn btn-primary">Back</a>
+
+{% endblock %}

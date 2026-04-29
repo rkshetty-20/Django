@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Recommendations – OptiSeat{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="text-center mb-5 fade-up">
+    <div style="color:var(--muted2);font-size:.85rem;font-weight:600;margin-bottom:.6rem;"><i class="bi bi-stars me-1"></i> AI ENGINE</div>
+    <h1 class="section-title">Recommended For <span class="text-grad">You</span></h1>
+    <p style="color:var(--muted2);max-width:500px;margin:0 auto;margin-top:.7rem;line-height:1.7;">
+      Based on your <strong style="color:var(--text);">{{ student.department.name }}</strong> background,
+      CGPA of <strong style="color:var(--text);">{{ student.cgpa }}</strong>, and career demand signals.
+    </p>
+  </div>
+
+  <div class="row g-4">
+    {% for course in recommendations %}
+    <div class="col-md-6 col-lg-4 fade-up" style="animation-delay:{{ forloop.counter0 }}00ms;">
+      <div class="glass-card p-4 h-100 d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          {% if course.category == 'PROFESSIONAL' %}
+            <span class="badge-pro">Professional</span>
+          {% elif course.category == 'OPEN' %}
+            <span class="badge-open">Open Elective</span>
+          {% else %}
+            <span class="badge-ability">Ability Enhn.</span>
+          {% endif %}
+          <div style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);border-radius:100px;padding:.25rem .7rem;font-size:.75rem;font-weight:700;color:#F59E0B;">
+            <i class="bi bi-stars me-1"></i>AI Pick
+          </div>
+        </div>
+        <h4 style="font-weight:700;font-size:1.05rem;margin-bottom:.3rem;">{{ course.name }}</h4>
+        <div style="color:var(--accent);font-size:.8rem;font-weight:600;margin-bottom:1rem;">
+          {{ course.department.name }} · {{ course.code }}
+        </div>
+        <p style="color:var(--muted2);font-size:.85rem;line-height:1.6;flex-grow:1;">
+          {{ course.job_perspective|truncatewords:20 }}
+        </p>
+        <div class="d-flex justify-content-between align-items-center mt-3 pt-3" style="border-top:1px solid var(--border);">
+          <div>
+            <div style="font-size:.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Seats</div>
+            <div style="font-weight:700;{% if course.available_seats < 3 %}color:var(--red){% else %}color:var(--green){% endif %};">
+              {{ course.available_seats }} / {{ course.capacity }}
+            </div>
+          </div>
+          <a href="{% url 'submit_preference' %}" class="btn btn-accent btn-sm px-3">Add to Prefs</a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5" style="color:var(--muted);">
+      <div style="font-size:3rem;margin-bottom:1rem;">🤖</div>
+      <h5 style="font-weight:600;">No recommendations generated yet</h5>
+      <p style="font-size:.9rem;margin-top:.5rem;">Make sure your department profile is set up correctly.</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if recommendations %}
+  <div class="glass-card p-4 mt-5 fade-up" style="background:rgba(99,102,241,.04);border-color:rgba(99,102,241,.15);">
+    <div class="d-flex align-items-start gap-3">
+      <div style="font-size:1.5rem;flex-shrink:0;">🧠</div>
+      <div>
+        <div style="font-weight:700;margin-bottom:.4rem;">How This Works</div>
+        <p style="color:var(--muted2);font-size:.85rem;line-height:1.7;margin:0;">
+          The recommendation engine uses <strong style="color:var(--text);">content-based filtering</strong> — it matches your
+          department's career keywords against course descriptions, job perspectives, and features.
+          CGPA tier (High ≥8.5 / Mid ≥6.0 / Foundation) boosts relevance for advanced vs foundational courses.
+          Availability is also factored so you see courses with open seats.
+        </p>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="text-center mt-4 fade-up">
+    <a href="{% url 'submit_preference' %}" class="btn btn-accent me-2">
+      <i class="bi bi-list-ol me-1"></i>Go to Preference Form
+    </a>
+    <a href="{% url 'catalog' %}" class="btn btn-ghost">
+      <i class="bi bi-grid me-1"></i>Full Catalog
+    </a>
+  </div>
+</div>
+{% endblock %}

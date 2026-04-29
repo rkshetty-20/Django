@@ -1,0 +1,142 @@
+/* 🔥 Root panel */
+#truth-engine-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 320px;
+    height: 100vh;
+    background: #0a0a0c;
+    color: #e0e0e0;
+    z-index: 9999999;
+    font-family: system-ui, -apple-system, sans-serif;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.6);
+    padding: 16px;
+    overflow-y: auto;
+}
+
+/* 🧠 Score */
+.truth-score {
+    font-size: 32px;
+    font-weight: bold;
+    color: #00ff88;
+}
+
+/* ⚠️ Verdict */
+.truth-verdict {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #ffcc00;
+}
+
+/* 📋 TLDR */
+.truth-tldr li {
+    margin-bottom: 6px;
+    font-size: 13px;
+}
+
+/* 🔍 Flagged claims */
+.truth-flag {
+    margin-top: 8px;
+    padding: 8px;
+    border-left: 3px solid #ff4444;
+    background: rgba(255, 68, 68, 0.08);
+    font-size: 12px;
+}
+
+/* 🚀 Floating button */
+#truth-engine-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999999;
+    background: #00ff88;
+    color: black;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#truth-engine-btn:hover {
+    transform: scale(1.05);
+}
+
+#truth-engine-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 999999;
+    background: #00ff88;
+    color: black;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#truth-engine-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 320px;
+    height: 100vh;
+    background: #0a0a0c;
+    color: #e0e0e0;
+    z-index: 9999999;
+    padding: 16px;
+    font-family: system-ui;
+    overflow-y: auto;
+}
+
+.te-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.te-score {
+    font-size: 32px;
+    color: #00ff88;
+}
+
+.te-verdict {
+    margin: 10px 0;
+    color: #ffcc00;
+}
+
+.te-flag {
+    border-left: 3px solid #ff4444;
+    padding: 6px;
+    margin-top: 6px;
+    background: rgba(255,68,68,0.1);
+}
+
+.te-highlight {
+    background: rgba(255, 68, 68, 0.3);
+    border-bottom: 2px solid red;
+    cursor: pointer;
+}
+
+#te-badge {
+    
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 999999;
+    padding: 10px 14px;
+    font-weight: bold;
+    color: black;
+    border-radius: 10px;
+    font-family: system-ui;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.2s ease;
+}
+
+#te-badge:hover {
+    transform: scale(1.05);
+}

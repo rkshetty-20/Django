@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<a href="/submit/" class="btn btn-primary mb-3">Select Preferences</a>
+
+<div id="course-list">
+<table class="table table-bordered">
+    <tr>
+        <th>Course</th>
+        <th>Department</th>
+        <th>Seats Left</th>
+        <th>Job Perspective</th>
+    </tr>
+    {% for c in courses %}
+    <tr>
+        <td>{{ c.name }}</td>
+        <td>{{ c.department.name }}</td>
+        <td>{{ c.available_seats }}</td>
+        <td>{{ c.job_perspective }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+
+<a href="/allocate/" class="btn btn-success">Run Allocation</a>
+<a href="/export/" class="btn btn-secondary">Download CSV</a>
+
+{% endblock %}

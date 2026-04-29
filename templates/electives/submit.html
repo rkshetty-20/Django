@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<form method="post">
+    {% csrf_token %}
+    <label>Choice 1</label>
+    {{ form.choice1 }}
+
+    <label>Choice 2</label>
+    {{ form.choice2 }}
+
+    <label>Choice 3</label>
+    {{ form.choice3 }}
+
+    <br><br>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+{% endblock %}

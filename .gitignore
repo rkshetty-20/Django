@@ -1,0 +1,91 @@
+# =========================
+# 🐍 PYTHON
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+.env
+.venv
+venv/
+env/
+
+# Python packaging
+build/
+dist/
+*.egg-info/
+
+# =========================
+# 🌐 NODE / FRONTEND
+# =========================
+node_modules/
+dist/
+build/
+.vite/
+.next/
+out/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# 🔐 ENV & SECRETS
+# =========================
+.env
+.env.*
+*.env
+
+# =========================
+# 🧠 AI / DATA / CACHE
+# =========================
+.cache/
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.pth
+
+# Large datasets (optional)
+data/
+datasets/
+
+# =========================
+# 🖥️ OS FILES
+# =========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =========================
+# 🧰 EDITORS / IDEs
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# 📦 EXTENSION / BUILD FILES
+# =========================
+*.crx
+*.zip
+
+# =========================
+# 🧪 TEST / TEMP
+# =========================
+coverage/
+htmlcov/
+.tmp/
+temp/
+
+# =========================
+# 🔥 MISC
+# =========================
+*.log
+*.bak
+*.old

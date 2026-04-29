@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "Spec_C — Truth Engine",
+  "version": "2.0.0",
+  "description": "Autonomous real-time product intelligence overlay powered by Truth Engine",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*.amazon.in/*",
+    "*://*.amazon.com/*",
+    "*://*.flipkart.com/*",
+    "*://*.snapdeal.com/*",
+    "*://*.myntra.com/*",
+    "*://*.ajio.com/*",
+    "*://*.croma.com/*",
+    "*://*.reliancedigital.in/*",
+    "http://localhost:8000/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.amazon.in/*",
+        "*://*.amazon.com/*",
+        "*://*.flipkart.com/*",
+        "*://*.snapdeal.com/*",
+        "*://*.myntra.com/*",
+        "*://*.ajio.com/*",
+        "*://*.croma.com/*",
+        "*://*.reliancedigital.in/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

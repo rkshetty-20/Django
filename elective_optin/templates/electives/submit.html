@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+{% block title %}Submit Preferences – OptiSeat{% endblock %}
+
+{% block extra_css %}
+<style>
+.rank-card {
+  background:var(--card2); border:1.5px solid var(--border); border-radius:16px;
+  padding:1.2rem 1.4rem; transition:border-color .2s, box-shadow .2s;
+}
+.rank-card:focus-within {
+  border-color:var(--accent); box-shadow:0 0 0 3px rgba(99,102,241,.15);
+}
+.rank-badge {
+  width:44px;height:44px;border-radius:12px;background:var(--grad);
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;flex-shrink:0;
+}
+.rank-2 { background:linear-gradient(135deg,#10B981,#059669); }
+.rank-3 { background:linear-gradient(135deg,#F59E0B,#D97706); }
+.score-explainer { background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.15);border-radius:14px;padding:1.2rem; }
+
+/* Suggestion panel */
+.suggest-panel {
+  display:none;
+  margin-top:.75rem;
+  border-radius:14px;
+  padding:1rem 1.2rem;
+  border:1.5px solid rgba(239,68,68,.3);
+  background:rgba(239,68,68,.05);
+  animation:fadeUp .3s ease both;
+}
+.suggest-panel.show { display:block; }
+.suggest-panel.ok {
+  border-color:rgba(16,185,129,.3);
+  background:rgba(16,185,129,.05);
+}
+.alt-chip {
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);
+  border-radius:10px;padding:.35rem .9rem;font-size:.8rem;font-weight:600;
+  color:#818CF8;cursor:pointer;transition:background .2s,color .2s;margin:.25rem;
+}
+.alt-chip:hover { background:rgba(99,102,241,.25);color:#fff; }
+.seat-bar-mini { height:4px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:3px; }
+.seat-bar-mini-fill { height:100%;border-radius:4px;background:var(--grad); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:760px;">
+
+  <div class="text-center mb-5 fade-up">
+    <div style="color:var(--muted2);font-size:.85rem;font-weight:600;margin-bottom:.6rem;"><i class="bi bi-list-ol me-1"></i> PREFERENCE SUBMISSION</div>
+    <h1 class="section-title">Choose Your Top 3 Electives</h1>
+    <p style="color:var(--muted2);margin-top:.6rem;line-height:1.7;">
+      Rank your choices. The algorithm allocates seats based on your CGPA, priority order, and submission time.
+    </p>
+  </div>
+
+  <!-- Score Formula Info Box -->
+  <div class="score-explainer mb-4 fade-up delay-1">
+    <div style="font-weight:700;margin-bottom:.7rem;font-size:.9rem;"><i class="bi bi-calculator me-2 text-accent"></i>How Your Score is Computed</div>
+    <div class="row g-3 text-center">
+      <div class="col-4">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:800;" class="text-grad">50%</div>
+        <div style="color:var(--muted2);font-size:.8rem;margin-top:.2rem;">CGPA Weight</div>
+      </div>
+      <div class="col-4">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:800;color:#34D399;">30%</div>
+        <div style="color:var(--muted2);font-size:.8rem;margin-top:.2rem;">Preference Rank</div>
+      </div>
+      <div class="col-4">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:800;color:#F59E0B;">20%</div>
+        <div style="color:var(--muted2);font-size:.8rem;margin-top:.2rem;">Submission Time</div>
+      </div>
+    </div>
+    <div class="divider mt-3 mb-2"></div>
+    <div style="font-size:.78rem;color:var(--muted2);">Score = (CGPA × 5) + Choice Bonus (30/20/10 pts) + Time Bonus (up to 20 pts)</div>
+  </div>
+
+  <!-- Form -->
+  <div class="glass-card p-4 fade-up delay-2">
+    <form method="post" id="prefForm" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+      <div class="alert alert-danger mb-4">
+        <i class="bi bi-exclamation-circle me-2"></i>{{ form.non_field_errors.0 }}
+      </div>
+      {% endif %}
+
+      <!-- Choice 1 -->
+      <div class="rank-card mb-3">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="rank-badge">1</div>
+          <div>
+            <div style="font-weight:700;">First Choice</div>
+            <div style="color:var(--muted2);font-size:.82rem;">Highest priority · +30 bonus points</div>
+          </div>
+        </div>
+        {{ form.choice1 }}
+        {% if form.choice1.errors %}<small class="text-danger mt-1 d-block">{{ form.choice1.errors.0 }}</small>{% endif %}
+        <div class="suggest-panel" id="suggest-1"></div>
+      </div>
+
+      <!-- Choice 2 -->
+      <div class="rank-card mb-3">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="rank-badge rank-2">2</div>
+          <div>
+            <div style="font-weight:700;">Second Choice</div>
+            <div style="color:var(--muted2);font-size:.82rem;">Fallback if Choice 1 is full · +20 bonus points</div>
+          </div>
+        </div>
+        {{ form.choice2 }}
+        {% if form.choice2.errors %}<small class="text-danger mt-1 d-block">{{ form.choice2.errors.0 }}</small>{% endif %}
+        <div class="suggest-panel" id="suggest-2"></div>
+      </div>
+
+      <!-- Choice 3 -->
+      <div class="rank-card mb-4">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="rank-badge rank-3">3</div>
+          <div>
+            <div style="font-weight:700;">Third Choice</div>
+            <div style="color:var(--muted2);font-size:.82rem;">Last resort · +10 bonus points</div>
+          </div>
+        </div>
+        {{ form.choice3 }}
+        {% if form.choice3.errors %}<small class="text-danger mt-1 d-block">{{ form.choice3.errors.0 }}</small>{% endif %}
+        <div class="suggest-panel" id="suggest-3"></div>
+      </div>
+
+      <!-- Submit + Warning -->
+      <div class="alert alert-warning mb-3 py-2" style="font-size:.82rem;">
+        <i class="bi bi-info-circle me-1"></i>
+        You can update your preferences until admin runs the final allocation.
+        <strong>Do not select the same course twice.</strong>
+      </div>
+
+      <button type="submit" class="btn btn-accent w-100 py-3" style="font-size:1rem;" id="submitBtn">
+        <i class="bi bi-check2-circle me-2"></i>Save My Preferences
+      </button>
+    </form>
+  </div>
+
+  <div class="text-center mt-3">
+    <a href="{% url 'catalog' %}" style="color:var(--muted);font-size:.85rem;text-decoration:none;">
+      <i class="bi bi-grid me-1"></i>Browse full catalog first
+    </a>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── Duplicate-check on submit ──────────────────────────────────────────────
+document.getElementById('prefForm').addEventListener('submit', function(e) {
+  const v = ['choice1','choice2','choice3'].map(id => document.getElementById(id).value);
+  const vals = v.filter(Boolean);
+  if (new Set(vals).size !== vals.length) {
+    e.preventDefault();
+    alert('⚠️ You have selected the same course more than once. Please choose 3 different courses.');
+    return false;
+  }
+  document.getElementById('submitBtn').innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving…';
+  document.getElementById('submitBtn').disabled = true;
+});
+
+// ── Intelligent Course Suggestion via AJAX ────────────────────────────────
+function checkCourse(selectEl, rankNum) {
+  const courseId = selectEl.value;
+  const panel    = document.getElementById('suggest-' + rankNum);
+
+  // Reset panel when user clears selection
+  if (!courseId) {
+    panel.className = 'suggest-panel';
+    panel.innerHTML = '';
+    return;
+  }
+
+  fetch(`/api/check-course/${courseId}/`)
+    .then(r => r.json())
+    .then(data => {
+  
+      if (data.status === 'available') {
+        panel.className = 'suggest-panel ok show';
+        panel.innerHTML =
+          '<div style="display:flex;align-items:center;gap:.6rem;">'
+          + '<span style="font-size:1.2rem;">\u2705</span>'
+          + '<div>'
+          + '<div style="font-weight:700;color:#34D399;font-size:.88rem;">Seats Available</div>'
+          + '<div style="color:var(--muted2);font-size:.78rem;">' + data.available + ' seat' + (data.available !== 1 ? 's' : '') + ' remaining \u2014 great choice!</div>'
+          + '</div></div>';
+  
+      } else if (data.status === 'full') {
+        let alts = '';
+        data.alternatives.forEach(function(c) {
+          alts +=
+            '<div class="alt-chip" title="' + c.dept + ' \u00b7 ' + c.category + '"'
+            + ' onclick="applyAlt(' + c.id + ', this, ' + rankNum + ')" data-name="' + c.name + '">'
+            + '<span>' + c.name + '</span>'
+            + '<span style="opacity:.7;font-size:.72rem;">' + c.seats + ' seats</span>'
+            + '</div>';
+        });
+  
+        panel.className = 'suggest-panel show';
+        panel.innerHTML =
+          '<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem;">'
+          + '<span style="font-size:1.1rem;">\u274c</span>'
+          + '<div style="font-weight:700;color:#F87171;font-size:.88rem;">' + data.course_name + ' is fully booked</div>'
+          + '</div>'
+          + '<div style="font-size:.78rem;color:var(--muted2);margin-bottom:.5rem;">'
+          + '<i class="bi bi-lightbulb me-1" style="color:#F59E0B;"></i>'
+          + 'Intelligent alternatives (tap to apply):'
+          + '</div>'
+          + '<div>' + (alts || '<span style="color:var(--muted);font-size:.8rem;">No alternatives available right now.</span>') + '</div>';
+      }
+    })
+    .catch(function() {
+      panel.className = 'suggest-panel';
+      panel.innerHTML = '';
+    });
+}
+
+// Apply a suggested course directly into the dropdown
+function applyAlt(courseId, chipEl, rankNum) {
+  const select = document.getElementById('choice' + rankNum);
+  if (select) {
+    select.value = courseId;
+    // Trigger the change check so the panel re-evaluates
+    checkCourse(select, rankNum);
+  }
+}
+
+// Bind change events to all three dropdowns
+['choice1','choice2','choice3'].forEach((id, idx) => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('change', () => checkCourse(el, idx + 1));
+    // Run once on page load if pre-filled
+    if (el.value) checkCourse(el, idx + 1);
+  }
+});
+</script>
+{% endblock %}

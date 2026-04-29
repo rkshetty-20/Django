@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard – OptiSeat{% endblock %}
+
+{% block extra_css %}
+<style>
+.chart-card { background:var(--card);border:1px solid var(--border);border-radius:20px;padding:1.5rem; }
+.chart-title { font-weight:700;font-size:.95rem;margin-bottom:1.2rem;color:var(--text); }
+.alloc-table-wrap { max-height:380px; overflow-y:auto; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-start mb-5 fade-up">
+    <div>
+      <div style="color:var(--muted2);font-size:.85rem;font-weight:600;margin-bottom:.4rem;"><i class="bi bi-bar-chart-line me-1"></i> ADMIN PANEL</div>
+      <h1 class="section-title">Analytics Dashboard</h1>
+      <p style="color:var(--muted2);margin-top:.4rem;">Live platform metrics &amp; allocation control</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap mt-1">
+      <a href="{% url 'export_csv' %}" class="btn btn-ghost">
+        <i class="bi bi-download me-2"></i>Export CSV
+      </a>
+      <form method="post" class="d-inline" id="allocForm">
+        {% csrf_token %}
+        <button type="submit" name="run_allocation" class="btn btn-accent" id="allocBtn"
+                onclick="return confirmAlloc();">
+          <i class="bi bi-play-circle me-2"></i>Run Allocation
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="row g-4 mb-5 fade-up delay-1">
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div style="color:var(--muted2);font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;">Total Students</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:2.4rem;font-weight:800;" class="text-grad">{{ stats.total_students }}</div>
+          </div>
+          <div class="stat-icon" style="background:rgba(99,102,241,.15);"><i class="bi bi-people" style="color:#818CF8;"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div style="color:var(--muted2);font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;">Preferences Submitted</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:2.4rem;font-weight:800;color:#F59E0B;">{{ stats.submitted }}</div>
+          </div>
+          <div class="stat-icon" style="background:rgba(245,158,11,.15);"><i class="bi bi-list-check" style="color:#F59E0B;"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div style="color:var(--muted2);font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;">Allocated</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:2.4rem;font-weight:800;color:#34D399;">{{ stats.allocated }}</div>
+          </div>
+          <div class="stat-icon" style="background:rgba(16,185,129,.15);"><i class="bi bi-check2-all" style="color:#34D399;"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div style="color:var(--muted2);font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;">Courses</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:2.4rem;font-weight:800;color:#60A5FA;">{{ stats.total_courses }}</div>
+          </div>
+          <div class="stat-icon" style="background:rgba(59,130,246,.15);"><i class="bi bi-book" style="color:#60A5FA;"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 1 -->
+  <div class="row g-4 mb-4 fade-up delay-2">
+    <!-- Demand Chart -->
+    <div class="col-lg-6">
+      <div class="chart-card h-100">
+        <div class="chart-title"><i class="bi bi-fire me-2" style="color:#EF4444;"></i>Most Demanded Electives</div>
+        <canvas id="demandChart" height="260"></canvas>
+      </div>
+    </div>
+    <!-- Seats Filled vs Remaining -->
+    <div class="col-lg-6">
+      <div class="chart-card h-100">
+        <div class="chart-title"><i class="bi bi-pie-chart me-2" style="color:#6366F1;"></i>Seat Occupancy Overview</div>
+        <canvas id="seatChart" height="260"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 2 -->
+  <div class="row g-4 mb-5 fade-up delay-3">
+    <!-- Dept Participation -->
+    <div class="col-lg-4">
+      <div class="chart-card h-100">
+        <div class="chart-title"><i class="bi bi-buildings me-2" style="color:#10B981;"></i>Department Participation</div>
+        <canvas id="deptChart" height="260"></canvas>
+      </div>
+    </div>
+    <!-- Avg CGPA per course -->
+    <div class="col-lg-4">
+      <div class="chart-card h-100">
+        <div class="chart-title"><i class="bi bi-graph-up me-2" style="color:#F59E0B;"></i>Avg CGPA per Course</div>
+        <canvas id="cgpaChart" height="260"></canvas>
+      </div>
+    </div>
+    <!-- Top Rejected -->
+    <div class="col-lg-4">
+      <div class="chart-card h-100">
+        <div class="chart-title"><i class="bi bi-x-circle me-2" style="color:#EF4444;"></i>Top Rejected Courses</div>
+        <canvas id="rejectedChart" height="260"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Seat Table -->
+  <div class="glass-card p-4 mb-4 fade-up delay-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 style="font-weight:700;margin:0;"><i class="bi bi-table me-2 text-accent"></i>Live Course Seat Status</h5>
+      <span class="pulse-anim" style="width:10px;height:10px;background:var(--green);border-radius:50%;display:inline-block;"></span>
+    </div>
+    <div class="table-responsive">
+      <table class="dark-table">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Course</th>
+            <th>Category</th>
+            <th>Department</th>
+            <th style="width:25%;">Occupancy</th>
+            <th class="text-end">Available</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for course in courses %}
+          <tr>
+            <td style="color:var(--accent);font-weight:600;font-size:.82rem;">{{ course.code }}</td>
+            <td style="font-weight:600;">{{ course.name }}</td>
+            <td>
+              {% if course.category == 'PROFESSIONAL' %}<span class="badge-pro">Professional</span>
+              {% elif course.category == 'OPEN' %}<span class="badge-open">Open</span>
+              {% else %}<span class="badge-ability">Ability</span>{% endif %}
+            </td>
+            <td style="color:var(--muted2);font-size:.85rem;">{{ course.department.name }}</td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="progress flex-grow-1" style="height:6px;">
+                  <div class="progress-bar-accent {% if course.available_seats == 0 %}bg-danger{% endif %}" style="width:{{ course.fill_percentage }}%;{% if course.available_seats == 0 %}background:var(--red)!important;{% endif %}"></div>
+                </div>
+                <span style="color:var(--muted);font-size:.75rem;white-space:nowrap;">{{ course.current_seats }}/{{ course.capacity }}</span>
+              </div>
+            </td>
+            <td class="text-end">
+              <span style="font-weight:800;font-size:1.1rem;{% if course.available_seats == 0 %}color:var(--red){% else %}color:var(--green){% endif %};">
+                {{ course.available_seats }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Allocation Results Table -->
+  {% if allocations %}
+  <div class="glass-card p-4 fade-up">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 style="font-weight:700;margin:0;"><i class="bi bi-award me-2" style="color:#34D399;"></i>Allocation Results ({{ allocations.count }} students)</h5>
+      <a href="{% url 'export_csv' %}" class="btn btn-ghost btn-sm"><i class="bi bi-download me-1"></i>Download CSV</a>
+    </div>
+    <div class="table-responsive alloc-table-wrap">
+      <table class="dark-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>USN</th>
+            <th>Dept</th>
+            <th>CGPA</th>
+            <th>Allotted Course</th>
+            <th>Choice #</th>
+            <th>Score</th>
+            <th>Allotted At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in allocations %}
+          <tr>
+            <td style="font-weight:600;">{{ r.student.full_name|default:r.student.user.username }}</td>
+            <td style="color:var(--muted);font-size:.82rem;">{{ r.student.usn|default:"–" }}</td>
+            <td style="color:var(--muted2);font-size:.82rem;">{{ r.student.department.code }}</td>
+            <td><span style="font-weight:700;color:var(--accent);">{{ r.student.cgpa }}</span></td>
+            <td>
+              <div style="font-weight:600;">{{ r.course.name }}</div>
+              <div style="color:var(--muted);font-size:.75rem;">{{ r.course.code }}</div>
+            </td>
+            <td class="text-center">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;margin:0 auto;">{{ r.preference_rank }}</div>
+            </td>
+            <td style="font-weight:700;color:#34D399;">{{ r.score|floatformat:1 }}</td>
+            <td style="color:var(--muted);font-size:.8rem;">{{ r.allocated_at|date:"M d, H:i" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+function confirmAlloc() {
+  if (!confirm('Run allocation for ALL pending preferences?')) return false;
+  var btn = document.getElementById('allocBtn');
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Running…';
+  btn.disabled = true;
+  if (typeof showToast === 'function') showToast('Running allocation algorithm…', 'info');
+  return true;
+}
+const ACCENT  = '#6366F1';
+const GREEN   = '#10B981';
+const YELLOW  = '#F59E0B';
+const RED     = '#EF4444';
+const BLUE    = '#3B82F6';
+const PURPLE  = '#8B5CF6';
+const CHART_COLORS = [ACCENT, GREEN, YELLOW, RED, BLUE, PURPLE, '#EC4899', '#14B8A6'];
+
+Chart.defaults.color = '#64748B';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
+
+const gridOpts = { color: 'rgba(255,255,255,0.05)', borderColor:'transparent' };
+const pluginOpts = { legend:{ display:false }, tooltip:{ backgroundColor:'#1E293B', titleColor:'#F1F5F9', bodyColor:'#94A3B8', borderColor:'rgba(255,255,255,.1)', borderWidth:1 } };
+
+// 1. Demand Chart
+const demandRaw = {{ demand_json|safe }};
+new Chart(document.getElementById('demandChart'), {
+  type: 'bar',
+  data: {
+    labels: demandRaw.map(d => d.course__name.length > 18 ? d.course__name.slice(0,18)+'…' : d.course__name),
+    datasets: [{ data: demandRaw.map(d => d.count), backgroundColor: CHART_COLORS, borderRadius: 8, borderSkipped: false }]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    scales: { x:{ grid:gridOpts }, y:{ grid:gridOpts, ticks:{ stepSize:1 } } },
+    plugins: pluginOpts
+  }
+});
+
+// 2. Seat occupancy doughnut
+const seatRaw = {{ seat_json|safe }};
+new Chart(document.getElementById('seatChart'), {
+  type: 'doughnut',
+  data: {
+    labels: seatRaw.map(c => c.name.length > 16 ? c.name.slice(0,16)+'…' : c.name),
+    datasets: [{
+      data: seatRaw.map(c => c.filled),
+      backgroundColor: CHART_COLORS,
+      borderWidth: 2, borderColor: '#111827', hoverOffset: 6
+    }]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins: { ...pluginOpts, legend:{ display:true, position:'right', labels:{ color:'#94A3B8', boxWidth:12, padding:12, font:{ size:11 } } } },
+    cutout: '62%'
+  }
+});
+
+// 3. Dept participation
+const deptRaw = {{ dept_json|safe }};
+new Chart(document.getElementById('deptChart'), {
+  type: 'pie',
+  data: {
+    labels: deptRaw.map(d => d.course__department__name),
+    datasets: [{ data: deptRaw.map(d => d.count), backgroundColor: CHART_COLORS, borderWidth: 2, borderColor: '#111827' }]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins: { ...pluginOpts, legend:{ display:true, position:'bottom', labels:{ color:'#94A3B8', boxWidth:12, padding:10, font:{ size:10 } } } }
+  }
+});
+
+// 4. Avg CGPA horizontal bar
+const cgpaRaw = {{ cgpa_json|safe }};
+new Chart(document.getElementById('cgpaChart'), {
+  type: 'bar',
+  data: {
+    labels: cgpaRaw.map(d => d.name.length > 18 ? d.name.slice(0,18)+'…' : d.name),
+    datasets: [{ data: cgpaRaw.map(d => d.avg), backgroundColor: YELLOW, borderRadius:6, borderSkipped:false }]
+  },
+  options: {
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    scales: { x:{ grid:gridOpts, min:0, max:10 }, y:{ grid:gridOpts } },
+    plugins: pluginOpts
+  }
+});
+
+// 5. Rejected courses bar
+const rejRaw = {{ rejected_json|safe }};
+new Chart(document.getElementById('rejectedChart'), {
+  type: 'bar',
+  data: {
+    labels: rejRaw.map(d => d.course__name.length > 16 ? d.course__name.slice(0,16)+'…' : d.course__name),
+    datasets: [{ data: rejRaw.map(d => d.count), backgroundColor: RED, borderRadius:8, borderSkipped:false }]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    scales: { x:{ grid:gridOpts }, y:{ grid:gridOpts, ticks:{ stepSize:1 } } },
+    plugins: pluginOpts
+  }
+});
+</script>
+{% endblock %}
