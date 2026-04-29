@@ -159,28 +159,6 @@ elective_optin/
 
 ---
 
-## 🎯 CO–SDG Mapping
-
-| CO  | Implementation      | SDG      |
-| --- | ------------------- | -------- |
-| CO1 | URL routing & views | SDG 4.3  |
-| CO2 | Models & validation | SDG 4.5  |
-| CO3 | UI design           | SDG 10.2 |
-| CO4 | CSV export          | SDG 16.6 |
-| CO5 | AJAX updates        | SDG 9.C  |
-
----
-
-## 🌍 SDG Justification
-
-This system supports **SDG 4: Quality Education (Target 4.5)** by ensuring fair and transparent access to elective courses using a rule-based allocation system.
-
-It also supports **SDG 16: Peace, Justice and Strong Institutions (Target 16.6)** by providing exportable, auditable allocation reports.
-
-The use of Django validation and AJAX enhances accessibility and reduces bias in academic opportunities.
-
----
-
 ## 🧪 Verification Checklist
 
 * ✔ Application runs successfully
